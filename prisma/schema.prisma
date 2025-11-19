@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CredentialDeviceType {
+  singleDevice
+  multiDevice
+}
+
+enum AuthenticatorTransportFuture {
+  ble
+  cable
+  hybrid
+  internal
+  nfc
+  smartcard
+  usb
+}
+
+model passkeys {
+  id String @id
+  publicKey Bytes @db.ByteA
+  userId String @unique
+  webauthnUserID String @unique
+  counter BigInt
+  deviceType CredentialDeviceType
+  backedUp Boolean @default(false)
+  transports AuthenticatorTransportFuture[] 
+  createdAt DateTime @default(now())
+  lastUsedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([webauthnUserID])
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  passkeys  passkeys[]
+}
+
