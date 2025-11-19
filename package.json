@@ -4,7 +4,6 @@
     "description": "Backend for Capstone",
     "license": "ISC",
     "author": "",
-    "type": "module",
     "main": "index.js",
     "scripts": {
         "start": "npm run start:dev",
@@ -13,6 +12,7 @@
     },
     "dependencies": {
         "@hapi/hapi": "^21.4.4",
+        "@prisma/client": "^6.19.0",
         "@simplewebauthn/server": "^13.2.2",
         "dotenv": "^17.2.3"
     },
