@@ -1,8 +1,13 @@
 'use strict';
 
 const Hapi = require('@hapi/hapi');
+const auth = require('./api/auth');
+const CacheService = require('./services/redis/CacheService');
 
+const ClientError = require('./exeptions/ClientError');
 const init = async () => {
+    const cacheService = new CacheService();
+
     const server = Hapi.server({
         port: process.env.PORT || 3000,
         host: process.env.HOST || 'localhost',
@@ -10,6 +15,15 @@ const init = async () => {
             cors: {
                 origin: ['*'],
             },
+        },
+    });
+
+    await server.register(require('./plugins/prisma'));
+
+    await server.register({
+        plugin: auth,
+        options: {
+            cacheService,
         },
     });
 

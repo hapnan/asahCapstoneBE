@@ -13,8 +13,10 @@
     "dependencies": {
         "@hapi/hapi": "^21.4.4",
         "@prisma/client": "^6.19.0",
+        "@prisma/extension-accelerate": "^2.0.2",
         "@simplewebauthn/server": "^13.2.2",
-        "dotenv": "^17.2.3"
+        "dotenv": "^17.2.3",
+        "redis": "^5.9.0"
     },
     "devDependencies": {
         "nodemon": "^3.1.11",
