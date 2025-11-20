@@ -1,5 +1,3 @@
-'use strict';
-
 class ClientError extends Error {
     constructor(message, statusCode = 400) {
         super(message);
@@ -8,4 +6,4 @@ class ClientError extends Error {
     }
 }
 
-module.exports = ClientError;
+export default ClientError;

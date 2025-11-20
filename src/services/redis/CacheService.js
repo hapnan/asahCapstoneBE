@@ -1,9 +1,7 @@
-'use strict';
+import redis from 'redis';
+import dotenv from 'dotenv';
 
-const redis = require('redis');
-const env = require('dotenv');
-
-env.config();
+dotenv.config();
 
 class CacheService {
     constructor() {
@@ -39,4 +37,4 @@ class CacheService {
     }
 }
 
-module.exports = CacheService;
+export default CacheService;

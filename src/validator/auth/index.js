@@ -1,19 +1,19 @@
-const { RegisterUserSchema, LoginUserSchema } = require('../../validator/auth/schema');
-const InvariantError = require('../../exeptions/InvariantError');
+import { registerSchema, loginSchema } from './schema.js';
+import InvariantError from '../../exeptions/InvariantError.js';
 
 const AuthValidator = {
     validateRegisterUserPayload: (payload) => {
-        const validationResult = RegisterUserSchema.validate(payload);
+        const validationResult = registerSchema.validate(payload);
         if (validationResult.error) {
             throw new InvariantError(validationResult.error.message);
         }
     },
     validateLoginUserPayload: (payload) => {
-        const validationResult = LoginUserSchema.validate(payload);
+        const validationResult = loginSchema.validate(payload);
         if (validationResult.error) {
             throw new InvariantError(validationResult.error.message);
         }
     },
 };
 
-module.exports = AuthValidator;
+export default AuthValidator;

@@ -1,10 +1,7 @@
-'use strict';
-
-const Hapi = require('@hapi/hapi');
-const auth = require('./api/auth');
-const CacheService = require('./services/redis/CacheService');
-
-const ClientError = require('./exeptions/ClientError');
+import Hapi from '@hapi/hapi';
+import auth from './api/auth/index.js';
+import CacheService from './services/redis/CacheService.js';
+import ClientError from './exeptions/ClientError.js';
 const init = async () => {
     const cacheService = new CacheService();
 
@@ -21,7 +18,8 @@ const init = async () => {
         },
     });
 
-    await server.register(require('./plugins/prisma'));
+    const prismaPlugin = await import('./plugins/prisma.js');
+    await server.register(prismaPlugin.default);
 
     await server.register({
         plugin: auth,

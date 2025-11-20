@@ -2,24 +2,30 @@
     "name": "asahcapstonebe",
     "version": "0.0.1",
     "description": "Backend for Capstone",
+    "type": "module",
     "license": "ISC",
     "author": "",
     "main": "index.js",
     "scripts": {
         "start": "npm run start:dev",
         "start:prod": "NODE_ENV=production node ./src/server.js",
-        "start:dev": "nodemon ./src/server.js"
+        "start:dev": "nodemon ./src/server.js",
+        "generate": "prisma generate",
+        "migrate": "prisma migrate dev",
+        "migrate:deploy": "prisma migrate deploy"
     },
     "dependencies": {
         "@hapi/hapi": "^21.4.4",
-        "@prisma/client": "^6.19.0",
+        "@prisma/adapter-pg": "^7.0.0",
+        "@prisma/client": "^7.0.0",
         "@prisma/extension-accelerate": "^2.0.2",
         "@simplewebauthn/server": "^13.2.2",
         "dotenv": "^17.2.3",
+        "pg": "^8.13.1",
         "redis": "^5.9.0"
     },
     "devDependencies": {
         "nodemon": "^3.1.11",
-        "prisma": "^6.19.0"
+        "prisma": "^7.0.0"
     }
 }

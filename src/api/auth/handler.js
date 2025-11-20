@@ -1,12 +1,12 @@
-const {
+import {
     generateRegistrationOptions,
     generateAuthenticationOptions,
     verifyAuthenticationResponse,
     verifyRegistrationResponse,
-} = require('@simplewebauthn/server');
-const env = require('dotenv');
+} from '@simplewebauthn/server';
+import dotenv from 'dotenv';
 
-env.config();
+dotenv.config();
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 
@@ -158,4 +158,4 @@ class AuthHandler {
     }
 }
 
-module.exports = AuthHandler;
+export default AuthHandler;

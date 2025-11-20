@@ -1,9 +1,18 @@
-const { PrismaClient } = require('@prisma/client');
-const { withAccelerate } = require('@prisma/extension-accelerate');
+import { PrismaClient } from '../../generated/prisma/index.js';
+import { withAccelerate } from '@prisma/extension-accelerate';
+import 'dotenv/config';
 
 class AuthService {
     constructor() {
-        this._prisma = new PrismaClient().$extends(withAccelerate());
+        this._prisma = new PrismaClient({
+            accelerateUrl: process.env.DATABASE_URL,
+        }).$extends(
+            withAccelerate({
+                cache: {
+                    ttl: 60,
+                },
+            })
+        );
     }
     async getUserById(id) {
         const user = await this._prisma.user.findUnique({
@@ -45,4 +54,4 @@ class AuthService {
     }
 }
 
-module.exports = AuthService;
+export default AuthService;

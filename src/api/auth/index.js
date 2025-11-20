@@ -1,7 +1,7 @@
-const AuthHandler = require('./handler');
-const routes = require('./routes');
+import AuthHandler from './handler.js';
+import routes from './routes.js';
 
-module.exports = {
+export default {
     name: 'auth',
     version: '0.0.1',
     dependencies: ['prisma'],
