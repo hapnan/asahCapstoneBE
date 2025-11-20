@@ -1,0 +1,294 @@
+# Asah Capstone Backend
+
+Backend API for Asah Capstone Project built with Hapi.js, Prisma ORM v7, PostgreSQL, Redis, and WebAuthn authentication.
+
+## 🚀 Tech Stack
+
+-   **Framework**: [Hapi.js](https://hapi.dev/) v21
+-   **ORM**: [Prisma](https://www.prisma.io/) v7 with Accelerate + Caching
+-   **Database**: PostgreSQL
+-   **Cache**: Redis
+-   **Authentication**: [SimpleWebAuthn](https://simplewebauthn.dev/) (Passkey authentication)
+-   **Session**: @hapi/yar (Cookie-based sessions)
+
+## 📋 Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+-   [Node.js](https://nodejs.org/) (v20.19 or higher)
+-   [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+-   [PostgreSQL](https://www.postgresql.org/) (v12 or higher)
+-   [Redis](https://redis.io/) (v6 or higher)
+-   [Prisma Accelerate](https://console.prisma.io/) account (for caching)
+
+## 🛠️ Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/hapnan/asahCapstoneBE.git
+cd asahCapstoneBE
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Set Up Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+# Prisma Accelerate Connection (with caching)
+# Get from: https://console.prisma.io/
+DATABASE_URL="prisma://accelerate.prisma-data.net/?api_key=YOUR_API_KEY"
+
+# Direct PostgreSQL Connection (for migrations)
+DIRECT_DATABASE_URL="postgresql://user:password@localhost:5432/asah_db"
+
+# Redis Configuration
+REDIS_URL="redis://localhost:6379"
+
+# Server Configuration
+PORT=3000
+HOST=localhost
+NODE_ENV=development
+```
+
+#### Getting Your Prisma Accelerate URL:
+
+1. Go to [https://console.prisma.io/](https://console.prisma.io/)
+2. Create a new project
+3. Connect your PostgreSQL database
+4. Copy your Accelerate connection string
+5. Paste it as your `DATABASE_URL`
+
+See [ACCELERATE_SETUP.md](./ACCELERATE_SETUP.md) for detailed Prisma Accelerate setup instructions.
+
+### 4. Set Up Database
+
+Generate Prisma Client:
+
+```bash
+npm run generate
+```
+
+Run database migrations:
+
+```bash
+npm run migrate
+```
+
+### 5. Start Redis
+
+Make sure Redis is running:
+
+```bash
+# On Windows (if installed via Chocolatey or WSL)
+redis-server
+
+# On macOS (if installed via Homebrew)
+brew services start redis
+
+# On Linux
+sudo systemctl start redis
+```
+
+### 6. Start Development Server
+
+```bash
+npm run start:dev
+```
+
+The server will start at `http://localhost:3000`
+
+## 📜 Available Scripts
+
+| Command                  | Description                                        |
+| ------------------------ | -------------------------------------------------- |
+| `npm start`              | Start development server (alias for `start:dev`)   |
+| `npm run start:dev`      | Start development server with hot reload (nodemon) |
+| `npm run start:prod`     | Start production server                            |
+| `npm run generate`       | Generate Prisma Client                             |
+| `npm run migrate`        | Run database migrations (dev)                      |
+| `npm run migrate:deploy` | Deploy migrations (production)                     |
+
+## 🔌 API Endpoints
+
+### Authentication (WebAuthn/Passkey)
+
+| Method | Endpoint                 | Description                                |
+| ------ | ------------------------ | ------------------------------------------ |
+| `GET`  | `/auth/register/options` | Get registration options for new passkey   |
+| `POST` | `/auth/register/verify`  | Verify and complete passkey registration   |
+| `POST` | `/auth/login/options`    | Get authentication options                 |
+| `POST` | `/auth/login/verify`     | Verify and complete passkey authentication |
+| `POST` | `/auth/logout`           | Logout user                                |
+| `GET`  | `/auth/session/check`    | Check current session status               |
+
+## 🗄️ Database Schema
+
+The project uses Prisma ORM with the following models:
+
+### User
+
+-   `id`: UUID (Primary Key)
+-   `username`: String (Unique)
+-   `name`: String
+-   `createdAt`: DateTime
+-   `updatedAt`: DateTime
+-   Relations: Has many `passkeys`
+
+### Passkeys
+
+-   `id`: String (Primary Key)
+-   `publicKey`: Bytes
+-   `userId`: String (Foreign Key)
+-   `webauthnUserID`: String (Unique)
+-   `counter`: BigInt
+-   `deviceType`: Enum (singleDevice, multiDevice)
+-   `backedUp`: Boolean
+-   `transports`: Array of AuthenticatorTransportFuture
+-   `createdAt`: DateTime
+-   `lastUsedAt`: DateTime
+-   Relations: Belongs to `User`
+
+## 🔧 Configuration
+
+### CORS Configuration
+
+By default, the server accepts requests from:
+
+-   Production: `https://asah.hapnanarsad.com`
+-   Development: `http://localhost:5173`
+
+To modify CORS settings, edit `src/server.js`:
+
+```javascript
+routes: {
+    cors: {
+        origin: ['http://localhost:5173', 'http://localhost:5174'],
+        credentials: true,
+        additionalHeaders: ['cache-control', 'x-requested-with'],
+    },
+}
+```
+
+### Session Configuration
+
+Sessions are managed using `@hapi/yar` with the following settings:
+
+-   Cookie name: Managed by Yar
+-   Duration: 7 days
+-   Secure: `true` in production, `false` in development
+-   HttpOnly: `true` (XSS protection)
+-   SameSite: `Lax` (CSRF protection)
+
+### Cache Configuration
+
+Prisma Accelerate caching is configured with:
+
+-   Default TTL: 60 seconds
+-   Location: `src/plugins/prisma.js` and `src/services/prisma/authService.js`
+
+To customize cache TTL:
+
+```javascript
+withAccelerate({
+    cache: {
+        ttl: 60, // seconds
+    },
+});
+```
+
+## 🏗️ Project Structure
+
+```
+asahCapstoneBE/
+├── prisma/
+│   ├── migrations/          # Database migrations
+│   └── schema.prisma        # Prisma schema definition
+├── src/
+│   ├── api/
+│   │   └── auth/           # Authentication routes & handlers
+│   │       ├── handler.js  # Route handlers
+│   │       ├── index.js    # Plugin registration
+│   │       └── routes.js   # Route definitions
+│   ├── exeptions/          # Custom error classes
+│   ├── generated/
+│   │   └── prisma/         # Generated Prisma Client
+│   ├── plugins/
+│   │   └── prisma.js       # Prisma plugin configuration
+│   ├── services/
+│   │   ├── prisma/         # Prisma services
+│   │   └── redis/          # Redis cache service
+│   ├── validator/          # Request validation schemas
+│   └── server.js           # Main server file
+├── .env                    # Environment variables (create this)
+├── .env.example            # Example environment variables
+├── package.json            # Dependencies and scripts
+├── prisma.config.mjs       # Prisma configuration
+└── README.md              # This file
+```
+
+## 🔐 Security Features
+
+-   ✅ **Passkey Authentication** - Passwordless login using WebAuthn
+-   ✅ **CORS Protection** - Configured allowed origins
+-   ✅ **HttpOnly Cookies** - XSS protection
+-   ✅ **SameSite Cookies** - CSRF protection
+-   ✅ **Secure Cookies** - HTTPS in production
+-   ✅ **Error Handling** - Custom error classes and handlers
+
+## 🚢 Deployment
+
+### Production Checklist
+
+1. ✅ Set `NODE_ENV=production` in environment variables
+2. ✅ Use production Prisma Accelerate connection
+3. ✅ Update CORS origins to production domain
+4. ✅ Ensure Redis is accessible
+5. ✅ Run migrations: `npm run migrate:deploy`
+6. ✅ Generate client: `npm run generate`
+7. ✅ Start server: `npm run start:prod`
+
+### Environment Variables for Production
+
+```env
+NODE_ENV=production
+DATABASE_URL="prisma://accelerate.prisma-data.net/?api_key=PROD_API_KEY"
+DIRECT_DATABASE_URL="postgresql://user:password@prod-host:5432/asah_db"
+REDIS_URL="redis://prod-redis:6379"
+PORT=3000
+HOST=0.0.0.0
+```
+
+## 📚 Additional Resources
+
+-   [Prisma v7 Documentation](https://www.prisma.io/docs)
+-   [Prisma Accelerate Setup](./ACCELERATE_SETUP.md)
+-   [Hapi.js Documentation](https://hapi.dev/api/)
+-   [SimpleWebAuthn Docs](https://simplewebauthn.dev/)
+-   [WebAuthn Guide](https://webauthn.guide/)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+ISC
+
+## 👥 Authors
+
+-   GitHub: [@hapnan](https://github.com/hapnan)
+
+---
+
+**Happy Coding! 🚀**
