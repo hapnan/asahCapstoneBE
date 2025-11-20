@@ -1,36 +1,18 @@
-import { PrismaClient } from '../../generated/prisma/index.js';
-import { withAccelerate } from '@prisma/extension-accelerate';
-import 'dotenv/config';
-
 class AuthService {
-    constructor() {
-        this._prisma = new PrismaClient({
-            accelerateUrl: process.env.DATABASE_URL,
-        }).$extends(
-            withAccelerate({
-                cache: {
-                    ttl: 60,
-                },
-            })
-        );
-    }
-    async getUserById(id) {
-        const user = await this._prisma.user.findUnique({
-            where: { id },
+    constructor() {}
+    async getUserByusername(request, username) {
+        const { prisma } = request.server.app;
+        const user = await prisma.user.findUnique({
+            where: { username },
         });
         return user;
     }
 
-    async createUser({
-        username,
-        name,
-        webauthnUserID,
-        publicKey,
-        counter,
-        transports,
-        deviceType,
-        id,
-    }) {
+    async createUser(
+        request,
+        { username, name, webauthnUserID, publicKey, counter, transports, deviceType, id }
+    ) {
+        const { prisma } = request.server.app;
         const newUser = await prisma.user.create({
             include: {
                 passkeys: true,
@@ -51,6 +33,25 @@ class AuthService {
             },
         });
         return newUser;
+    }
+
+    async getPasskeysByusername(request, username) {
+        const { prisma } = request.server.app;
+        const userWithPasskeys = await prisma.user.findUnique({
+            where: { username },
+            include: {
+                passkeys: true,
+            },
+        });
+        return userWithPasskeys ? userWithPasskeys.passkeys : [];
+    }
+
+    async updatePasskeyCounter(request, { id, counter }) {
+        const { prisma } = request.server.app;
+        await prisma.passkeys.update({
+            where: { id: id },
+            data: { counter: counter },
+        });
     }
 }
 

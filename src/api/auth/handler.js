@@ -4,24 +4,20 @@ import {
     verifyAuthenticationResponse,
     verifyRegistrationResponse,
 } from '@simplewebauthn/server';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import 'dotenv/config';
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 
 class AuthHandler {
-    constructor(cacheService) {
+    constructor(cacheService, authService) {
         this._cacheService = cacheService;
+        this._authService = authService;
     }
 
     async registerOptions(request, h) {
         const { username, name } = request.query;
-        const { prisma } = request.server.app;
 
-        const user = await prisma.user.findUnique({
-            where: { username },
-        });
+        const user = await this._authService.getUserByusername(request, username);
 
         if (user != null) {
             const response = h.response({
@@ -32,13 +28,7 @@ class AuthHandler {
             return response;
         }
 
-        const userPasskey = await prisma.passkeys.findMany({
-            where: {
-                user: {
-                    username: username,
-                },
-            },
-        });
+        const userPasskey = await this._authService.getPasskeysByusername(request, username);
 
         const options = await generateRegistrationOptions({
             rpName: 'Asah App',
@@ -88,16 +78,26 @@ class AuthHandler {
             return response;
         }
         const { verified } = verification;
+
+        this._authService.createUser(request, {
+            username: username,
+            name: JSON.parse(registerOptions).user.displayName,
+            webauthnUserID: JSON.parse(registerOptions).user.id,
+            publicKey: verification.registrationInfo.credential.publicKey,
+            counter: verification.registrationInfo.credential.counter,
+            transports: verification.registrationInfo.credential.transports,
+            deviceType: verification.registrationInfo.credentialDeviceType,
+            id: verification.registrationInfo.credential.id,
+        });
+
         return verified;
     }
 
     async authOptions(request, h) {
-        const { username } = request.payload;
-        const { prisma } = request.server.app;
+        const { username } = request.query;
 
-        const user = await prisma.user.findUnique({
-            where: { username },
-        });
+        const user = await this._authService.getUserByusername(request, username);
+        console.log('user:', user);
         if (!user) {
             const response = h.response({
                 status: 'fail',
@@ -106,24 +106,16 @@ class AuthHandler {
             response.code(404);
             return response;
         }
-
-        const userPasskey = await prisma.passkeys.findMany({
-            where: {
-                user: {
-                    username: username,
-                },
-            },
-        });
-
-        const options = generateAuthenticationOptions({
+        const userPasskey = await this._authService.getPasskeysByusername(request, username);
+        console.log('userPasskey:', userPasskey[0]);
+        const options = await generateAuthenticationOptions({
             rpID: nodeEnv == 'production' ? 'asahbe.hapnanarsad.com' : 'localhost',
-            allowCredentials: userPasskey.map((passkey) => ({
-                id: Buffer.from(passkey.webauthnUserID, 'base64url'),
-                transports: passkey.transports,
+            allowCredentials: userPasskey.map((passkeys) => ({
+                id: passkeys.id,
+                transports: passkeys.transports,
             })),
-            userVerification: 'preferred',
         });
-
+        console.log('auth options:', options);
         await this._cacheService.set(`auth_options_${username}`, JSON.stringify(options), 300);
 
         return options;
@@ -132,7 +124,8 @@ class AuthHandler {
     async verifyAuth(request, h) {
         const { username, authenticationResponse } = request.payload;
         const authOptions = await this._cacheService.get(`auth_options_${username}`);
-
+        const passkey = await this._authService.getPasskeysByusername(request, username);
+        console.log('passkey:', passkey[0]);
         let verification;
         try {
             verification = await verifyAuthenticationResponse({
@@ -141,11 +134,15 @@ class AuthHandler {
                 expectedOrigin:
                     nodeEnv == 'production'
                         ? 'https://asahbe.hapnanarsad.com'
-                        : 'http://localhost:3000',
+                        : 'http://localhost:5173',
                 expectedRPID: nodeEnv == 'production' ? 'asahbe.hapnanarsad.com' : 'localhost',
+                credential: {
+                    id: passkey[0].id,
+                    publicKey: passkey[0].publicKey,
+                    counter: passkey[0].counter,
+                    transports: passkey[0].transports,
+                },
             });
-
-            return verification;
         } catch (error) {
             console.error('Authentication verification error:', error);
             const response = h.response({
@@ -154,6 +151,40 @@ class AuthHandler {
             });
             response.code(400);
             return response;
+        }
+
+        const { verified } = verification;
+        const { authenticationInfo } = verification;
+        request.yar.set({
+            id: passkey[0].id,
+        });
+        // Update the counter in the database
+        await this._authService.updatePasskeyCounter(request, {
+            id: passkey[0].id,
+            counter: authenticationInfo.newCounter,
+        });
+        return verified;
+    }
+
+    async sessionCheckHandler(request, h) {
+        const userId = request.yar.get('userId');
+
+        if (userId) {
+            return h.response({ userId }).code(200);
+        }
+
+        return h.response({ session: 'No active session' }).code(401);
+    }
+
+    async logoutHandler(request, h) {
+        try {
+            // Clear all session data
+            request.yar.reset();
+
+            return h.response({ message: 'Logged out successfully' }).code(200);
+        } catch (error) {
+            console.error('Logout error:', error);
+            return h.response({ error: 'Logout failed' }).code(500);
         }
     }
 }
