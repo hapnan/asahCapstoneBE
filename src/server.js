@@ -16,6 +16,9 @@ const init = async () => {
                 origin: ['*'],
             },
         },
+        debug: {
+            request: ['error'],
+        },
     });
 
     await server.register(require('./plugins/prisma'));

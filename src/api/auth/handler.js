@@ -18,11 +18,11 @@ class AuthHandler {
     async registerOptions(request, h) {
         const { username, name } = request.query;
         const { prisma } = request.server.app;
-        console.log(username, name);
+
         const user = await prisma.user.findUnique({
             where: { username },
         });
-        console.log('current user:', user);
+
         if (user != null) {
             const response = h.response({
                 status: 'fail',
@@ -32,51 +32,32 @@ class AuthHandler {
             return response;
         }
 
-        userPasskey = await prisma.passkeys.findMany({
+        const userPasskey = await prisma.passkeys.findMany({
             where: {
                 user: {
                     username: username,
                 },
             },
         });
-        console.log(userPasskey.length);
 
-        let options;
-        if (userPasskey.length < 0) {
-            options = await generateRegistrationOptions({
-                rpName: 'Asah App',
-                rpID: nodeEnv == 'production' ? 'asahbe.hapnanarsad.com' : 'localhost',
-                userName: username,
-                attestationType: 'none',
-                authenticatorSelection: {
-                    residentKey: 'required',
-                    userVerification: 'preferred',
-                    authenticatorAttachment: 'cross-platform',
-                },
-                preferredAuthenticatorType: 'remoteDevice',
-            });
-        } else {
-            options = await generateRegistrationOptions({
-                rpName: 'Asah App',
-                rpID: nodeEnv == 'production' ? 'asahbe.hapnanarsad.com' : 'localhost',
-                userName: username,
-                attestationType: 'none',
-                excludeCredentials: userPasskey.map((passkey) => ({
-                    id: Buffer.from(passkey.webauthnUserID, 'base64url'),
-                    transport: passkey.transports,
-                })),
-                authenticatorSelection: {
-                    residentKey: 'required',
-                    userVerification: 'preferred',
-                    authenticatorAttachment: 'cross-platform',
-                },
-                preferredAuthenticatorType: 'remoteDevice',
-            });
-        }
+        const options = await generateRegistrationOptions({
+            rpName: 'Asah App',
+            rpID: nodeEnv == 'production' ? 'asahbe.hapnanarsad.com' : 'localhost',
+            userName: username,
+            userDisplayName: name,
+            attestationType: 'none',
+            excludeCredentials: userPasskey.map((passkey) => ({
+                id: Buffer.from(passkey.webauthnUserID, 'base64url'),
+                transport: passkey.transports,
+            })),
+            authenticatorSelection: {
+                residentKey: 'required',
+                userVerification: 'preferred',
+                authenticatorAttachment: 'cross-platform',
+            },
+        });
 
-        console.log(options);
-
-        this._cacheService.set(`register_options_${username}`, JSON.stringify(options), 300);
+        await this._cacheService.set(`register_options_${username}`, JSON.stringify(options), 300);
 
         return options;
     }
@@ -94,10 +75,11 @@ class AuthHandler {
                 expectedOrigin:
                     nodeEnv == 'production'
                         ? 'https://asahbe.hapnanarsad.com'
-                        : 'http://localhost:3000',
+                        : 'http://localhost:5173',
                 expectedRPID: nodeEnv == 'production' ? 'asahbe.hapnanarsad.com' : 'localhost',
             });
         } catch (error) {
+            console.error('Registration verification error:', error);
             const response = h.response({
                 status: 'fail',
                 message: 'Registration verification failed',
@@ -105,11 +87,14 @@ class AuthHandler {
             response.code(400);
             return response;
         }
+        const { verified } = verification;
+        return verified;
     }
 
     async authOptions(request, h) {
         const { username } = request.payload;
-        const prisma = request.server.app.prisma;
+        const { prisma } = request.server.app;
+
         const user = await prisma.user.findUnique({
             where: { username },
         });
@@ -121,12 +106,17 @@ class AuthHandler {
             response.code(404);
             return response;
         }
-        const userPasskey = await prisma.passkey.findMany({
-            where: { username: username },
+
+        const userPasskey = await prisma.passkeys.findMany({
+            where: {
+                user: {
+                    username: username,
+                },
+            },
         });
 
         const options = generateAuthenticationOptions({
-            rpID: 'localhost',
+            rpID: nodeEnv == 'production' ? 'asahbe.hapnanarsad.com' : 'localhost',
             allowCredentials: userPasskey.map((passkey) => ({
                 id: Buffer.from(passkey.webauthnUserID, 'base64url'),
                 transports: passkey.transports,
@@ -134,7 +124,7 @@ class AuthHandler {
             userVerification: 'preferred',
         });
 
-        this._cacheService.set(`auth_options_${username}`, JSON.stringify(options), 300);
+        await this._cacheService.set(`auth_options_${username}`, JSON.stringify(options), 300);
 
         return options;
     }
@@ -157,6 +147,7 @@ class AuthHandler {
 
             return verification;
         } catch (error) {
+            console.error('Authentication verification error:', error);
             const response = h.response({
                 status: 'fail',
                 message: 'Authentication verification failed',
