@@ -8,6 +8,6 @@ export default defineConfig({
     },
     datasource: {
         // Use direct connection for migrations
-        url: env('DATABASE_URL'),
+        url: env('DIRECT_DATABASE_URL'),
     },
 });
