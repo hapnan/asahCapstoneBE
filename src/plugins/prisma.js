@@ -1,7 +1,11 @@
-import { PrismaClient } from '../generated/prisma/index.js';
+import { PrismaClient } from '../generated/prisma/client.js'
 import { withAccelerate } from '@prisma/extension-accelerate';
 import 'dotenv/config';
+import { PrismaPg } from '@prisma/adapter-pg';
 
+const adapter = new PrismaPg({ 
+  connectionString: process.env.DATABASE_URL 
+});
 // plugin to instantiate Prisma Client
 const prismaPlugin = {
     name: 'prisma',
@@ -9,7 +13,8 @@ const prismaPlugin = {
         const prisma = new PrismaClient({
             // Use Accelerate connection string
             // Uncomment 👇 for logs
-            log: ['error', 'warn', 'query'],
+            // log: ['error', 'warn', 'query'],
+            adapter,
         }).$extends(
             withAccelerate({
                 cache: {
