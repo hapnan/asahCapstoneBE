@@ -4,7 +4,7 @@ import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 const adapter = new PrismaPg({ 
-  connectionString: process.env.DATABASE_URL 
+  connectionString: process.env.DIRECT_DATABASE_URL 
 });
 // plugin to instantiate Prisma Client
 const prismaPlugin = {
@@ -15,14 +15,7 @@ const prismaPlugin = {
             // Uncomment 👇 for logs
             // log: ['error', 'warn', 'query'],
             adapter,
-        }).$extends(
-            withAccelerate({
-                cache: {
-                    // Enable caching with default TTL of 60 seconds
-                    ttl: 60,
-                },
-            })
-        );
+        })
 
         server.app.prisma = prisma;
 
