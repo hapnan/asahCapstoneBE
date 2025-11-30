@@ -1,24 +1,21 @@
-import { PrismaClient } from "../generated/prisma/index.js";
+import { PrismaClient } from "../generated/prisma/client.js";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
 
+const adapter = new PrismaPg({
+  connectionString: process.env.DIRECT_DATABASE_URL,
+});
 // plugin to instantiate Prisma Client
 const prismaPlugin = {
   name: "prisma",
   register: async function (server) {
     const prisma = new PrismaClient({
       // Use Accelerate connection string
-      accelerateUrl: process.env.DATABASE_URL,
       // Uncomment 👇 for logs
-      log: ["error", "warn", "query"],
-    }).$extends(
-      withAccelerate({
-        cache: {
-          // Enable caching with default TTL of 60 seconds
-          ttl: 60,
-        },
-      })
-    );
+      // log: ['error', 'warn', 'query'],
+      adapter,
+    });
 
     server.app.prisma = prisma;
 

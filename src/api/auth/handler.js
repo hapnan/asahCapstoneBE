@@ -167,7 +167,7 @@ class AuthHandler {
     }
 
     async sessionCheckHandler(request, h) {
-        const userId = request.yar.get('userId');
+        const userId = request.yar.get('id');
 
         if (userId) {
             return h.response({ userId }).code(200);
@@ -179,7 +179,7 @@ class AuthHandler {
     async logoutHandler(request, h) {
         try {
             // Clear all session data
-            request.yar.reset();
+            request.yar.clear("id");
 
             return h.response({ message: 'Logged out successfully' }).code(200);
         } catch (error) {
