@@ -1,10 +1,9 @@
-import { PrismaClient } from '../generated/prisma/client.js'
-import { withAccelerate } from '@prisma/extension-accelerate';
+import { PrismaClient } from '../generated/prisma/client.js';
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 
-const adapter = new PrismaPg({ 
-  connectionString: process.env.DIRECT_DATABASE_URL 
+const adapter = new PrismaPg({
+    connectionString: process.env.DIRECT_DATABASE_URL,
 });
 // plugin to instantiate Prisma Client
 const prismaPlugin = {
@@ -15,7 +14,7 @@ const prismaPlugin = {
             // Uncomment 👇 for logs
             // log: ['error', 'warn', 'query'],
             adapter,
-        })
+        });
 
         server.app.prisma = prisma;
 

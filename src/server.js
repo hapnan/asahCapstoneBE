@@ -5,10 +5,15 @@ import prismaPlugin from './plugins/prisma.js';
 import CacheService from './services/redis/CacheService.js';
 import AuthService from './services/prisma/authService.js';
 import ClientError from './exeptions/ClientError.js';
+
+import predict from './api/predict/index.js';
+import MlService from './services/mechinelearning/mlServices.js';
+
 import 'dotenv/config';
 const init = async () => {
     const cacheService = new CacheService();
     const authService = new AuthService();
+    const mlService = new MlService();
 
     const server = Hapi.server({
         port: process.env.PORT || 3000,
@@ -55,6 +60,13 @@ const init = async () => {
         },
     });
 
+    await server.register({
+        plugin: predict,
+        options: {
+            mlService,
+        },
+    });
+
     server.ext('onPreResponse', (request, h) => {
         const { response } = request;
 
@@ -85,6 +97,10 @@ const init = async () => {
 
     await server.start();
     console.log('Server running on %s', server.info.uri);
+    console.log('\nRegistered routes:');
+    server.table().forEach((route) => {
+        console.log(`${route.method.toUpperCase()}\t${route.path}`);
+    });
 };
 
 process.on('unhandledRejection', (err) => {
