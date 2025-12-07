@@ -2,13 +2,9 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  // default from repo (Uncomment kalau bisa non JS-Oriented)
-  // provider = "prisma-client"
-  // output   = "../src/generated/prisma-ts"
-  // Untuk JS Oriented
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
-  // importFileExtension = "js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma-ts"
+  importFileExtension = "js"
 }
 
 datasource db {
