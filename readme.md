@@ -1,25 +1,27 @@
 # Asah Capstone Backend
 
-Backend API for Asah Capstone Project built with Hapi.js, Prisma ORM v7, PostgreSQL, Redis, and WebAuthn authentication.
+Backend API for Asah Capstone Project built with Hapi.js, Prisma ORM v7,
+PostgreSQL, Redis, and WebAuthn authentication.
 
 ## 🚀 Tech Stack
 
--   **Framework**: [Hapi.js](https://hapi.dev/) v21
--   **ORM**: [Prisma](https://www.prisma.io/) v7 with Accelerate + Caching
--   **Database**: PostgreSQL
--   **Cache**: Redis
--   **Authentication**: [SimpleWebAuthn](https://simplewebauthn.dev/) (Passkey authentication)
--   **Session**: @hapi/yar (Cookie-based sessions)
+- **Framework**: [Hapi.js](https://hapi.dev/) v21
+- **ORM**: [Prisma](https://www.prisma.io/) v7 with Accelerate + Caching
+- **Database**: PostgreSQL
+- **Cache**: Redis
+- **Authentication**: [SimpleWebAuthn](https://simplewebauthn.dev/) (Passkey
+  authentication)
+- **Session**: @hapi/yar (Cookie-based sessions)
 
 ## 📋 Prerequisites
 
 Before you begin, ensure you have the following installed:
 
--   [Node.js](https://nodejs.org/) (v20.19 or higher)
--   [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
--   [PostgreSQL](https://www.postgresql.org/) (v12 or higher)
--   [Redis](https://redis.io/) (v6 or higher)
--   [Prisma Accelerate](https://console.prisma.io/) account (for caching)
+- [Node.js](https://nodejs.org/) (v20.19 or higher)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- [PostgreSQL](https://www.postgresql.org/) (v12 or higher)
+- [Redis](https://redis.io/) (v6 or higher)
+- [Prisma Accelerate](https://console.prisma.io/) account (for caching)
 
 ## 🛠️ Installation
 
@@ -65,7 +67,8 @@ NODE_ENV=development
 4. Copy your Accelerate connection string
 5. Paste it as your `DATABASE_URL`
 
-See [ACCELERATE_SETUP.md](./ACCELERATE_SETUP.md) for detailed Prisma Accelerate setup instructions.
+See [ACCELERATE_SETUP.md](./ACCELERATE_SETUP.md) for detailed Prisma Accelerate
+setup instructions.
 
 ### 4. Set Up Database
 
@@ -128,32 +131,63 @@ The server will start at `http://localhost:3000`
 | `POST` | `/auth/logout`           | Logout user                                |
 | `GET`  | `/auth/session/check`    | Check current session status               |
 
+### Customers
+
+| Method | Endpoint         | Description                          |
+| ------ | ---------------- | ------------------------------------ |
+| `GET`  | `/customers`     | Get all customers list               |
+| `GET`  | `/customers/:id` | Get one customer based on customerId |
+
 ## 🗄️ Database Schema
 
 The project uses Prisma ORM with the following models:
 
 ### User
 
--   `id`: UUID (Primary Key)
--   `username`: String (Unique)
--   `name`: String
--   `createdAt`: DateTime
--   `updatedAt`: DateTime
--   Relations: Has many `passkeys`
+- `id`: UUID (Primary Key)
+- `username`: String (Unique)
+- `name`: String
+- `createdAt`: DateTime
+- `updatedAt`: DateTime
+- Relations: Has many `passkeys`
 
 ### Passkeys
 
--   `id`: String (Primary Key)
--   `publicKey`: Bytes
--   `userId`: String (Foreign Key)
--   `webauthnUserID`: String (Unique)
--   `counter`: BigInt
--   `deviceType`: Enum (singleDevice, multiDevice)
--   `backedUp`: Boolean
--   `transports`: Array of AuthenticatorTransportFuture
--   `createdAt`: DateTime
--   `lastUsedAt`: DateTime
--   Relations: Belongs to `User`
+- `id`: String (Primary Key)
+- `publicKey`: Bytes
+- `userId`: String (Foreign Key)
+- `webauthnUserID`: String (Unique)
+- `counter`: BigInt
+- `deviceType`: Enum (singleDevice, multiDevice)
+- `backedUp`: Boolean
+- `transports`: Array of AuthenticatorTransportFuture
+- `createdAt`: DateTime
+- `lastUsedAt`: DateTime
+- Relations: Belongs to `User`
+
+### Customers
+
+- `id`: Int (Primary Key)
+- `name`: String
+- `age`: Int
+- `job`: String
+- `education`: String
+- `marital`: Enum (divorced, married, single, unknown)
+- `contact_comunication`: String
+- `housing_loan`: Enum (yes, no,unknown)
+- `personal_loan`: Enum (yes, no,unknown)
+- `has_credit`: Enum (yes, no,unknown)
+- `last_day_contacted`: Enum (monday, tuesday, wednesday, thursday, friday,
+  saturday, sunday)
+- `last_month_contacted`: Enum (january, february, march, april, may, june,
+  july, august, september,october, november, december)
+- `how_many_contacted_now`: Int
+- `how_many_contacted_previous` Int
+- `days_last_contacted`: Int
+- `result_of_last_campaign`: Enum (failure, nonexistent, success)
+- `predictive_subscribe`: Enum (failure, nonexistent, success) => Filled based
+  on ML Result
+- `predictive_score_subscribe`: Float => Filled based on ML Result
 
 ## 🔧 Configuration
 
@@ -161,8 +195,8 @@ The project uses Prisma ORM with the following models:
 
 By default, the server accepts requests from:
 
--   Production: `https://asah.hapnanarsad.com`
--   Development: `http://localhost:5173`
+- Production: `https://asah.hapnanarsad.com`
+- Development: `http://localhost:5173`
 
 To modify CORS settings, edit `src/server.js`:
 
@@ -180,26 +214,26 @@ routes: {
 
 Sessions are managed using `@hapi/yar` with the following settings:
 
--   Cookie name: Managed by Yar
--   Duration: 7 days
--   Secure: `true` in production, `false` in development
--   HttpOnly: `true` (XSS protection)
--   SameSite: `Lax` (CSRF protection)
+- Cookie name: Managed by Yar
+- Duration: 7 days
+- Secure: `true` in production, `false` in development
+- HttpOnly: `true` (XSS protection)
+- SameSite: `Lax` (CSRF protection)
 
 ### Cache Configuration
 
 Prisma Accelerate caching is configured with:
 
--   Default TTL: 60 seconds
--   Location: `src/plugins/prisma.js` and `src/services/prisma/authService.js`
+- Default TTL: 60 seconds
+- Location: `src/plugins/prisma.js` and `src/services/prisma/authService.js`
 
 To customize cache TTL:
 
 ```javascript
 withAccelerate({
-    cache: {
-        ttl: 60, // seconds
-    },
+  cache: {
+    ttl: 60, // seconds
+  },
 });
 ```
 
@@ -235,12 +269,12 @@ asahCapstoneBE/
 
 ## 🔐 Security Features
 
--   ✅ **Passkey Authentication** - Passwordless login using WebAuthn
--   ✅ **CORS Protection** - Configured allowed origins
--   ✅ **HttpOnly Cookies** - XSS protection
--   ✅ **SameSite Cookies** - CSRF protection
--   ✅ **Secure Cookies** - HTTPS in production
--   ✅ **Error Handling** - Custom error classes and handlers
+- ✅ **Passkey Authentication** - Passwordless login using WebAuthn
+- ✅ **CORS Protection** - Configured allowed origins
+- ✅ **HttpOnly Cookies** - XSS protection
+- ✅ **SameSite Cookies** - CSRF protection
+- ✅ **Secure Cookies** - HTTPS in production
+- ✅ **Error Handling** - Custom error classes and handlers
 
 ## 🚢 Deployment
 
@@ -267,11 +301,11 @@ HOST=0.0.0.0
 
 ## 📚 Additional Resources
 
--   [Prisma v7 Documentation](https://www.prisma.io/docs)
--   [Prisma Accelerate Setup](./ACCELERATE_SETUP.md)
--   [Hapi.js Documentation](https://hapi.dev/api/)
--   [SimpleWebAuthn Docs](https://simplewebauthn.dev/)
--   [WebAuthn Guide](https://webauthn.guide/)
+- [Prisma v7 Documentation](https://www.prisma.io/docs)
+- [Prisma Accelerate Setup](./ACCELERATE_SETUP.md)
+- [Hapi.js Documentation](https://hapi.dev/api/)
+- [SimpleWebAuthn Docs](https://simplewebauthn.dev/)
+- [WebAuthn Guide](https://webauthn.guide/)
 
 ## 🤝 Contributing
 
@@ -287,7 +321,7 @@ ISC
 
 ## 👥 Authors
 
--   GitHub: [@hapnan](https://github.com/hapnan)
+- GitHub: [@hapnan](https://github.com/hapnan)
 
 ---
 

@@ -5,7 +5,6 @@ generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma-ts"
   importFileExtension = "js"
-
 }
 
 datasource db {
@@ -52,3 +51,67 @@ model User {
   passkeys  passkeys[]
 }
 
+enum mariageStatus {
+  divorced
+  married
+  single
+  unknown
+}
+
+enum Status {
+  yes
+  no
+  unknown
+}
+
+enum days {
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+  sunday
+}
+
+enum months {
+  january
+  february
+  march
+  april
+  may
+  june
+  july
+  august
+  september
+  october
+  november
+  december
+}
+
+enum subscribeStatus {
+  failure
+  nonexistent
+  success
+}
+
+model customers {
+  id Int @id @default(autoincrement())
+  name String
+  age Int
+  job String
+  education String
+  marital mariageStatus
+  contact_comunication String
+  housing_loan Status
+  personal_loan Status
+  has_credit Status
+  last_day_contacted days
+  last_month_contacted months
+  how_many_contacted_now Int
+  how_many_contacted_previous Int
+  days_last_contacted Int
+  result_of_last_campaign subscribeStatus
+  predictive_subscribe subscribeStatus
+  predictive_score_subscribe Float
+}
