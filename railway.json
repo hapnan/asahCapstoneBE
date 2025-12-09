@@ -1,14 +1,15 @@
 {
-  "$schema": "https://schema.railpack.com",
-  "steps": {
-    "install": {
-      "commands": ["npm install"]
-    },
-    "generate": {
-      "commands": ["npm run generateClient"]
-    }
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "npm install && npx prisma generate"
   },
   "deploy": {
-    "startCommand": "npm run start:prod"
+    "preDeployCommand": ["npx prisma migrate deploy"],
+    "startCommand": "npm run start:prod",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 300,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
   }
 }
