@@ -9,14 +9,19 @@ import CustomerService from "./services/prisma/customerService.js";
 import ClientError from "./exeptions/ClientError.js";
 
 import predict from "./api/predict/index.js";
+import PredictService from "./services/prisma/predictService.js";
 import MlService from "./services/mechinelearning/mlServices.js";
 
 import "dotenv/config";
+import analitics from "./api/analitics/index.js";
+import AnaliticService from "./services/prisma/analiticService.js";
 const init = async () => {
   const cacheService = new CacheService();
   const authService = new AuthService();
   const customersService = new CustomerService();
   const mlService = new MlService();
+  const analiticService = new AnaliticService();
+  const predictService = new PredictService();
 
   const server = Hapi.server({
     port: process.env.PORT || 3000,
@@ -67,6 +72,7 @@ const init = async () => {
     plugin: predict,
     options: {
       mlService,
+      predictService,
     },
   });
 
@@ -75,6 +81,13 @@ const init = async () => {
     options: {
       cacheService,
       customersService,
+    },
+  });
+
+  await server.register({
+    plugin: analitics,
+    options: {
+      analiticService,
     },
   });
 

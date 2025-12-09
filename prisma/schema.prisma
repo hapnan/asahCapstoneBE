@@ -2,9 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma-ts"
-  importFileExtension = "js"
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -25,6 +24,7 @@ enum AuthenticatorTransportFuture {
   smartcard
   usb
 }
+
 
 model passkeys {
   id String @id
@@ -49,6 +49,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   passkeys  passkeys[]
+  analitics analitics[]
 }
 
 enum mariageStatus {
@@ -99,12 +100,25 @@ model customers {
   id Int @id @default(autoincrement())
   name String
   age Int
+  campaign Int
   job String
   education String
   marital mariageStatus
-  contact_comunication String
-  housing_loan Status
-  personal_loan Status
+  contact String
+  day_of_week String
+  month String
+  default Status
+  housing Status
+  loan Status
+  duration Int
+  pdays Int
+  previous Int
+  poutcome String
+  emp_var_rate Float
+  cons_price_idx Float
+  cons_conf_idx Float
+  euribor3m Float
+  nr_employed Int
   has_credit Status
   last_day_contacted days
   last_month_contacted months
@@ -112,6 +126,23 @@ model customers {
   how_many_contacted_previous Int
   days_last_contacted Int
   result_of_last_campaign subscribeStatus
-  predictive_subscribe subscribeStatus
+  analitics analitics[]
+  predict predict[]
+}
+
+
+model predict {
+  id Int @id @default(autoincrement())
+  id_customer Int
+  predictive_subscribe String
   predictive_score_subscribe Float
+  customer customers @relation(fields: [id_customer], references: [id])
+}
+model analitics {
+  id Int @id @default(autoincrement())
+  id_user String
+  id_customer Int
+  status subscribeStatus
+  customer customers @relation(fields: [id_customer], references: [id])
+  user User @relation(fields: [id_user], references: [id])
 }

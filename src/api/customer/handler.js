@@ -23,6 +23,26 @@ export default class CustomersHandler {
     }
   }
 
+  async getAllCustomerForPredict(request, h) {
+    try {
+      const cacheKey = "customer_all_full";
+      try {
+        const cached = await this._cacheService.get(cacheKey);
+        return h.response(JSON.parse(cached)).code(200);
+      } catch (_) {}
+
+      const customers =
+        await this._customersService.getAllCustomerForPredict(request);
+
+      await this._cacheService.set(cacheKey, JSON.stringify(customers), 300);
+
+      return h.response(customers).code(200);
+    } catch (error) {
+      console.error("Get all customers full error: ", error);
+      return h.response({ error: "Internal server error" }).code(500);
+    }
+  }
+
   async getCustomerById(request, h) {
     try {
       const { id } = request.params;
@@ -35,7 +55,7 @@ export default class CustomersHandler {
 
       const customer = await this._customersService.getCustomersById(
         request,
-        id
+        id,
       );
 
       if (!customer) {

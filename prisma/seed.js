@@ -79,7 +79,7 @@ const random = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const randomInt = (min, max) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
 
-const prisma = new PrismaClient({adapter})
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   const customersData = [];
@@ -88,12 +88,25 @@ async function main() {
     customersData.push({
       name: random(names) + " " + random(["A.", "B.", "C.", "D."]),
       age: randomInt(20, 60),
+      campaign: randomInt(1, 5),
       job: random(jobs),
       education: random(educations),
       marital: random(marital),
-      contact_comunication: random(["email", "phone", "unknown"]),
-      housing_loan: random(status),
-      personal_loan: random(status),
+      contact: random(["cellular", "telephone", "unknown"]),
+      day_of_week: random(days),
+      month: random(months),
+      default: random(status),
+      housing: random(status),
+      loan: random(status),
+      duration: randomInt(0, 500),
+      pdays: randomInt(0, 999),
+      previous: randomInt(0, 7),
+      poutcome: random(["failure", "nonexistent", "success"]),
+      emp_var_rate: Number((Math.random() * 3 - 1).toFixed(1)),
+      cons_price_idx: Number((Math.random() * 2 + 92).toFixed(3)),
+      cons_conf_idx: Number((Math.random() * 10 - 50).toFixed(1)),
+      euribor3m: Number((Math.random() * 5).toFixed(3)),
+      nr_employed: randomInt(4900, 5300),
       has_credit: random(status),
       last_day_contacted: random(days),
       last_month_contacted: random(months),
@@ -101,22 +114,21 @@ async function main() {
       how_many_contacted_previous: randomInt(0, 15),
       days_last_contacted: randomInt(0, 31),
       result_of_last_campaign: random(subscribeStatus),
-      predictive_subscribe: random(subscribeStatus),
-      predictive_score_subscribe: Number(Math.random().toFixed(2)),
     });
   }
 
   await prisma.customers.createMany({ data: customersData });
 }
 
-
-main().then(async () => {
-  await prisma.$disconnect()
-}).catch(async (e) => {
-  console.error(e)
-  await prisma.$disconnect()
-  process.exit(1)
-})
+main()
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });
 // function generateOne() {
 //   return `
 // INSERT INTO customers (

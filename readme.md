@@ -43,10 +43,6 @@ npm install
 Create a `.env` file in the root directory:
 
 ```env
-# Prisma Accelerate Connection (with caching)
-# Get from: https://console.prisma.io/
-DATABASE_URL="prisma://accelerate.prisma-data.net/?api_key=YOUR_API_KEY"
-
 # Direct PostgreSQL Connection (for migrations)
 DIRECT_DATABASE_URL="postgresql://user:password@localhost:5432/asah_db"
 
@@ -58,17 +54,6 @@ PORT=3000
 HOST=localhost
 NODE_ENV=development
 ```
-
-#### Getting Your Prisma Accelerate URL:
-
-1. Go to [https://console.prisma.io/](https://console.prisma.io/)
-2. Create a new project
-3. Connect your PostgreSQL database
-4. Copy your Accelerate connection string
-5. Paste it as your `DATABASE_URL`
-
-See [ACCELERATE_SETUP.md](./ACCELERATE_SETUP.md) for detailed Prisma Accelerate
-setup instructions.
 
 ### 4. Set Up Database
 
@@ -292,7 +277,6 @@ asahCapstoneBE/
 
 ```env
 NODE_ENV=production
-DATABASE_URL="prisma://accelerate.prisma-data.net/?api_key=PROD_API_KEY"
 DIRECT_DATABASE_URL="postgresql://user:password@prod-host:5432/asah_db"
 REDIS_URL="redis://prod-redis:6379"
 PORT=3000
@@ -321,7 +305,7 @@ ISC
 
 ## 👥 Authors
 
-- GitHub: [@hapnan](https://github.com/hapnan)
+- GitHub: [@hapnan](https://github.com/hapnan), [@TatakAdi](https://github.com/TatakAdi)
 
 ---
 
