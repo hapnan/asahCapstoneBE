@@ -42,7 +42,6 @@ export default class CustomerService {
         contact: true,
         day_of_week: true,
         default: true,
-        duration: true,
         education: true,
         emp_var_rate: true,
         euribor3m: true,
