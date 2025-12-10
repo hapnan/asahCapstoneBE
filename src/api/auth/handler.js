@@ -35,7 +35,7 @@ class AuthHandler {
 
     const options = await generateRegistrationOptions({
       rpName: "Asah App",
-      rpID: nodeEnv == "production" ? "asahbe.hapnanarsad.com" : "localhost",
+      rpID: nodeEnv === "production" ? "asah.hapnanarsad.com" : "localhost",
       userName: username,
       userDisplayName: name,
       attestationType: "none",
@@ -76,7 +76,7 @@ class AuthHandler {
             ? "https://asah.hapnanarsad.com"
             : "http://localhost:5173",
         expectedRPID:
-          nodeEnv == "production" ? "asah.hapnanarsad.com" : "localhost",
+          nodeEnv === "production" ? "asah.hapnanarsad.com" : "localhost",
       });
     } catch (error) {
       console.error("Registration verification error:", error);
@@ -123,7 +123,7 @@ class AuthHandler {
     );
 
     const options = await generateAuthenticationOptions({
-      rpID: nodeEnv == "production" ? "asahbe.hapnanarsad.com" : "localhost",
+      rpID: nodeEnv === "production" ? "asah.hapnanarsad.com" : "localhost",
       allowCredentials: userPasskey.map((passkeys) => ({
         id: passkeys.id,
         transports: passkeys.transports,
@@ -154,11 +154,11 @@ class AuthHandler {
         response: authenticationResponse,
         expectedChallenge: JSON.parse(authOptions).challenge,
         expectedOrigin:
-          nodeEnv == "production"
+          nodeEnv === "production"
             ? "https://asah.hapnanarsad.com"
             : "http://localhost:5173",
         expectedRPID:
-          nodeEnv == "production" ? "asahbe.hapnanarsad.com" : "localhost",
+          nodeEnv === "production" ? "asah.hapnanarsad.com" : "localhost",
         credential: {
           id: passkey[0].id,
           publicKey: passkey[0].publicKey,
