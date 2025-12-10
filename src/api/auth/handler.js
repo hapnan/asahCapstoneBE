@@ -35,7 +35,7 @@ class AuthHandler {
 
     const options = await generateRegistrationOptions({
       rpName: "Asah App",
-      rpID: nodeEnv == "production" ? "asah.hapnanarsad.com" : "localhost",
+      rpID: nodeEnv == "production" ? "asahbe.hapnanarsad.com" : "localhost",
       userName: username,
       userDisplayName: name,
       attestationType: "none",
@@ -123,7 +123,7 @@ class AuthHandler {
     );
 
     const options = await generateAuthenticationOptions({
-      rpID: nodeEnv == "production" ? "asah.hapnanarsad.com" : "localhost",
+      rpID: nodeEnv == "production" ? "asahbe.hapnanarsad.com" : "localhost",
       allowCredentials: userPasskey.map((passkeys) => ({
         id: passkeys.id,
         transports: passkeys.transports,
