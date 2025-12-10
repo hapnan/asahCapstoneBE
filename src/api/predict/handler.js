@@ -8,9 +8,7 @@ class PredictionHandler {
   async handlePredictionRequest(request, h) {
     try {
       const { data } = request.payload;
-      console.log("Input data:", data);
       const prediction = await this._mlServices.predict(data);
-      console.log("Prediction response:", JSON.stringify(prediction));
 
       // Check if predictions array exists
       if (
@@ -21,26 +19,18 @@ class PredictionHandler {
         throw new Error("Invalid prediction response format");
       }
 
-      // Check if data is an array (multiple customers) or single object
-      if (Array.isArray(data)) {
-        // Handle multiple customers
-        for (let i = 0; i < data.length; i++) {
-          await this._predictService.addPredict(request, {
-            id_customer: data[i].id,
-            predictive_subscribe: prediction.predictions[i].prediction_label,
-            predictive_score_subscribe:
-              prediction.predictions[i].lead_score_probability,
-          });
-        }
-      } else {
-        // Handle single customer
-        await this._predictService.addPredict(request, {
-          id_customer: data.id_customer,
-          predictive_subscribe: prediction.predictions[0].prediction_label,
-          predictive_score_subscribe:
-            prediction.predictions[0].lead_score_probability,
-        });
-      }
+      // Handle predictions - the ML API now returns id in the prediction result
+      const predictionsData = prediction.predictions.map(
+        (predictionResult) => ({
+          id_customer: predictionResult.id,
+          predictive_subscribe: predictionResult.prediction_label,
+          predictive_score_subscribe: predictionResult.lead_score_probability,
+        }),
+      );
+
+      await this._predictService.addPredictBulk(request, predictionsData);
+
+      console.log("Prediction(s) saved");
 
       return h
         .response({

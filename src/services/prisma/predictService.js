@@ -16,6 +16,14 @@ class PredictService {
     return predict.id;
   }
 
+  async addPredictBulk(request, predictions) {
+    const { prisma } = request.server.app;
+    const result = await prisma.predict.createMany({
+      data: predictions,
+    });
+    return result.count;
+  }
+
   async getAllPredict(request) {
     const { prisma } = request.server.app;
     return prisma.predict.findMany();

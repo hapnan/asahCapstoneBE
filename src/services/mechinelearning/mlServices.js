@@ -10,6 +10,7 @@ class MLServices {
     const prediction = await fetch(process.env.ML_API, {
       method: "POST",
       headers: {
+        accept: "application/json",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
