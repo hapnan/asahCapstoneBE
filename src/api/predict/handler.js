@@ -7,7 +7,7 @@ class PredictionHandler {
 
   async handlePredictionRequest(request, h) {
     try {
-      const data = request.payload;
+      const { data } = request.payload;
       console.log("Input data:", data);
       const prediction = await this._mlServices.predict(data);
       console.log("Prediction response:", JSON.stringify(prediction));
