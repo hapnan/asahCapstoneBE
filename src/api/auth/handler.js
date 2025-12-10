@@ -35,7 +35,7 @@ class AuthHandler {
 
     const options = await generateRegistrationOptions({
       rpName: "Asah App",
-      rpID: nodeEnv == "production" ? "asahbe.hapnanarsad.com" : "localhost",
+      rpID: nodeEnv == "production" ? "asah.hapnanarsad.com" : "localhost",
       userName: username,
       userDisplayName: name,
       attestationType: "none",
@@ -73,10 +73,10 @@ class AuthHandler {
         expectedChallenge: JSON.parse(registerOptions).challenge,
         expectedOrigin:
           nodeEnv == "production"
-            ? "https://asahbe.hapnanarsad.com"
+            ? "https://asah.hapnanarsad.com"
             : "http://localhost:5173",
         expectedRPID:
-          nodeEnv == "production" ? "asahbe.hapnanarsad.com" : "localhost",
+          nodeEnv == "production" ? "asah.hapnanarsad.com" : "localhost",
       });
     } catch (error) {
       console.error("Registration verification error:", error);
