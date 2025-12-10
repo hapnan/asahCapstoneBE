@@ -7,10 +7,9 @@ class PredictionHandler {
 
   async handlePredictionRequest(request, h) {
     try {
-      const { model, data } = request.payload;
-      console.log("Received prediction request with model:", model);
+      const data = request.payload;
       console.log("Input data:", data);
-      const prediction = await this._mlServices.predict(data, model);
+      const prediction = await this._mlServices.predict(data);
       console.log("Prediction response:", JSON.stringify(prediction));
 
       // Check if predictions array exists
@@ -29,7 +28,8 @@ class PredictionHandler {
           await this._predictService.addPredict(request, {
             id_customer: data[i].id,
             predictive_subscribe: prediction.predictions[i].prediction_label,
-            predictive_score_subscribe: prediction.predictions[i].probability,
+            predictive_score_subscribe:
+              prediction.predictions[i].lead_score_probability,
           });
         }
       } else {
@@ -37,7 +37,8 @@ class PredictionHandler {
         await this._predictService.addPredict(request, {
           id_customer: data.id_customer,
           predictive_subscribe: prediction.predictions[0].prediction_label,
-          predictive_score_subscribe: prediction.predictions[0].probability,
+          predictive_score_subscribe:
+            prediction.predictions[0].lead_score_probability,
         });
       }
 
