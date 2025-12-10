@@ -123,7 +123,7 @@ class AuthHandler {
     );
 
     const options = await generateAuthenticationOptions({
-      rpID: nodeEnv == "production" ? "asahbe.hapnanarsad.com" : "localhost",
+      rpID: nodeEnv == "production" ? "asah.hapnanarsad.com" : "localhost",
       allowCredentials: userPasskey.map((passkeys) => ({
         id: passkeys.id,
         transports: passkeys.transports,
@@ -155,7 +155,7 @@ class AuthHandler {
         expectedChallenge: JSON.parse(authOptions).challenge,
         expectedOrigin:
           nodeEnv == "production"
-            ? "https://asahbe.hapnanarsad.com"
+            ? "https://asah.hapnanarsad.com"
             : "http://localhost:5173",
         expectedRPID:
           nodeEnv == "production" ? "asahbe.hapnanarsad.com" : "localhost",
