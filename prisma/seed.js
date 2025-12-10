@@ -98,7 +98,6 @@ async function main() {
       default: random(status),
       housing: random(status),
       loan: random(status),
-      duration: randomInt(0, 500),
       pdays: randomInt(0, 999),
       previous: randomInt(0, 7),
       poutcome: random(["failure", "nonexistent", "success"]),

@@ -110,7 +110,6 @@ model customers {
   default Status
   housing Status
   loan Status
-  duration Int
   pdays Int
   previous Int
   poutcome String
