@@ -227,29 +227,67 @@ withAccelerate({
 ```
 asahCapstoneBE/
 ├── prisma/
-│   ├── migrations/          # Database migrations
-│   └── schema.prisma        # Prisma schema definition
+│   ├── migrations/                    # Database migrations
+│   │   ├── migration_lock.toml
+│   │   ├── 20251119014147_init/
+│   │   ├── 20251204122929_add_customer_table/
+│   │   ├── 20251208170958_add_analitic_table/
+│   │   ├── 20251209151834_add_predict_table/
+│   │   ├── 20251209171516_change_datatype/
+│   │   ├── 20251209173528_change_datatype_predict/
+│   │   └── 20251210134828_remove_duration/
+│   ├── schema.prisma                  # Prisma schema definition
+│   └── seed.js                        # Database seeding script
 ├── src/
 │   ├── api/
-│   │   └── auth/           # Authentication routes & handlers
-│   │       ├── handler.js  # Route handlers
-│   │       ├── index.js    # Plugin registration
-│   │       └── routes.js   # Route definitions
-│   ├── exeptions/          # Custom error classes
+│   │   ├── analitics/                 # Analytics management
+│   │   │   ├── handler.js             # Analytics route handlers
+│   │   │   ├── index.js               # Plugin registration
+│   │   │   └── routes.js              # Route definitions
+│   │   ├── auth/                      # WebAuthn authentication
+│   │   │   ├── handler.js             # Auth route handlers
+│   │   │   ├── index.js               # Plugin registration
+│   │   │   └── routes.js              # Route definitions
+│   │   ├── customer/                  # Customer management
+│   │   │   ├── handler.js             # Customer route handlers
+│   │   │   ├── index.js               # Plugin registration
+│   │   │   └── routes.js              # Route definitions
+│   │   └── predict/                   # ML predictions
+│   │       ├── handler.js             # Prediction route handlers
+│   │       ├── index.js               # Plugin registration
+│   │       └── routes.js              # Route definitions
+│   ├── exeptions/                     # Custom error classes
+│   │   ├── ClientError.js
+│   │   ├── InvariantError.js
+│   │   └── NotFoundError.js
 │   ├── generated/
-│   │   └── prisma/         # Generated Prisma Client
+│   │   └── prisma/                    # Generated Prisma Client
+│   │       └── runtime/
 │   ├── plugins/
-│   │   └── prisma.js       # Prisma plugin configuration
+│   │   └── prisma.js                  # Prisma plugin configuration
 │   ├── services/
-│   │   ├── prisma/         # Prisma services
-│   │   └── redis/          # Redis cache service
-│   ├── validator/          # Request validation schemas
-│   └── server.js           # Main server file
-├── .env                    # Environment variables (create this)
-├── .env.example            # Example environment variables
-├── package.json            # Dependencies and scripts
-├── prisma.config.mjs       # Prisma configuration
-└── README.md              # This file
+│   │   ├── mechinelearning/           # ML services
+│   │   │   └── mlServices.js          # ML API integration
+│   │   ├── prisma/                    # Database services
+│   │   │   ├── analiticService.js     # Analytics CRUD operations
+│   │   │   ├── authService.js         # Auth database operations
+│   │   │   ├── customerService.js     # Customer CRUD operations
+│   │   │   └── predictService.js      # Prediction CRUD operations
+│   │   └── redis/                     # Caching services
+│   │       └── CacheService.js        # Redis cache operations
+│   ├── validator/                     # Request validation schemas
+│   │   └── auth/
+│   │       ├── index.js
+│   │       └── schema.js
+│   └── server.js                      # Main server file
+├── .env                               # Environment variables (create this)
+├── jsonformatter.json                 # JSON formatting config
+├── main.py                            # Python script (if applicable)
+├── package.json                       # Dependencies and scripts
+├── prisma.config.mjs                  # Prisma configuration
+├── railway.json                       # Railway deployment config
+├── tsconfig.prisma.json               # TypeScript config for Prisma
+└── README.md                          # This file
 ```
 
 ## 🔐 Security Features

@@ -15,6 +15,11 @@ import MlService from "./services/mechinelearning/mlServices.js";
 import "dotenv/config";
 import analitics from "./api/analitics/index.js";
 import AnaliticService from "./services/prisma/analiticService.js";
+
+import UserService from "./services/prisma/userService.js";
+
+import voice from "./api/voice/index.js";
+import TwilioService from "./services/twilio/twilioService.js";
 const init = async () => {
   const cacheService = new CacheService();
   const authService = new AuthService();
@@ -22,6 +27,8 @@ const init = async () => {
   const mlService = new MlService();
   const analiticService = new AnaliticService();
   const predictService = new PredictService();
+  const userService = new UserService();
+  const twilioService = new TwilioService();
 
   const server = Hapi.server({
     port: process.env.PORT || 3000,
@@ -88,6 +95,14 @@ const init = async () => {
     plugin: analitics,
     options: {
       analiticService,
+      userService,
+    },
+  });
+
+  await server.register({
+    plugin: voice,
+    options: {
+      twilioService,
     },
   });
 

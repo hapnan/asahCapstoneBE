@@ -26,6 +26,7 @@
     "fs": "^0.0.1-security",
     "pg": "^8.13.1",
     "redis": "^5.9.0",
+    "twilio": "^5.10.7",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
