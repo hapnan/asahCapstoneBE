@@ -178,8 +178,8 @@ class AuthHandler {
 
     const { verified } = verification;
     const { authenticationInfo } = verification;
-    request.yar.set({
-      id: passkey[0].id,
+    request.yar.set("user_loged", {
+      userID: passkey[0].id,
     });
     console.info("User authenticated successfully, session created.");
     // Update the counter in the database
@@ -191,10 +191,10 @@ class AuthHandler {
   }
 
   async sessionCheckHandler(request, h) {
-    const userId = request.yar.get("id");
+    const userLoged = request.yar.get("user_loged");
 
-    if (userId) {
-      return h.response({ userId }).code(200);
+    if (userLoged) {
+      return h.response({ userID: userLoged.userID }).code(200);
     }
 
     return h.response({ session: "No active session" }).code(401);
@@ -203,7 +203,7 @@ class AuthHandler {
   async logoutHandler(request, h) {
     try {
       // Clear all session data
-      request.yar.clear("id");
+      request.yar.reset();
 
       return h.response({ message: "Logged out successfully" }).code(200);
     } catch (error) {
