@@ -19,6 +19,14 @@ class analiticService {
     return analitics;
   }
 
+  async getAnaliticsById(request, { id }) {
+    const { prisma } = request.server.app;
+    const analitics = await prisma.analitics.findUnique({
+      where: { id },
+    });
+    return analitics;
+  }
+
   async deleteAnalitics(request, { id }) {
     const { prisma } = request.server.app;
     await prisma.analitics.delete({

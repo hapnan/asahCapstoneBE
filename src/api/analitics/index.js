@@ -5,8 +5,8 @@ export default {
   name: "analitics",
   version: "1.0.0",
   dependencies: ["prisma"],
-  register: async (server, { analiticService }) => {
-    const handler = new AnaliticsHandler(analiticService);
+  register: async (server, { analiticService, userService }) => {
+    const handler = new AnaliticsHandler(analiticService, userService);
     server.route(routes(handler));
   },
 };

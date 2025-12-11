@@ -10,13 +10,18 @@ const routes = (handler) => [
     handler: handler.getAnaliticsHandler,
   },
   {
+    method: "GET",
+    path: "/analitics/{customerId}",
+    handler: handler.getAnaliticsHandlerById,
+  },
+  {
     method: "DELETE",
-    path: "/analitics/{id}",
+    path: "/analitics/{customerId}",
     handler: handler.deleteAnaliticsHandler,
   },
   {
     method: "PUT",
-    path: "/analitics/{id}",
+    path: "/analitics/{customerId}",
     handler: handler.updateAnaliticsHandler,
   },
 ];
