@@ -20,6 +20,8 @@ import UserService from "./services/prisma/userService.js";
 
 import voice from "./api/voice/index.js";
 import TwilioService from "./services/twilio/twilioService.js";
+
+import UserHandler from "./api/user/index.js";
 const init = async () => {
   const cacheService = new CacheService();
   const authService = new AuthService();
@@ -80,6 +82,7 @@ const init = async () => {
     options: {
       mlService,
       predictService,
+      cacheService,
     },
   });
 
@@ -103,6 +106,13 @@ const init = async () => {
     plugin: voice,
     options: {
       twilioService,
+    },
+  });
+
+  await server.register({
+    plugin: UserHandler,
+    options: {
+      userService,
     },
   });
 

@@ -14,7 +14,7 @@ class VoiceHandler {
     try {
       const userLogged = request.yar.get("user_loged");
 
-      if (!userLogged || !userLogged.userID) {
+      if (!userLogged || !userLogged.passkeyId) {
         return h
           .response({
             status: "fail",
@@ -24,7 +24,7 @@ class VoiceHandler {
       }
 
       // Use the logged-in user's ID as identity
-      const identity = userLogged.userID;
+      const identity = userLogged.passkeyId;
 
       const token = this._twilioService.generateAccessToken(identity);
 

@@ -1,7 +1,8 @@
 class PredictionHandler {
-  constructor(mlServices, predictService) {
+  constructor(mlServices, predictService, cacheService) {
     this._mlServices = mlServices;
     this._predictService = predictService;
+    this._cacheService = cacheService;
     this.handlePredictionRequest = this.handlePredictionRequest.bind(this);
   }
 
@@ -31,7 +32,7 @@ class PredictionHandler {
       await this._predictService.addPredictBulk(request, predictionsData);
 
       console.log("Prediction(s) saved");
-
+      await this._cacheService.delete("customer_all");
       return h
         .response({
           prediction,

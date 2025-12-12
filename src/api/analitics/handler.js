@@ -58,11 +58,11 @@ class AnaliticsHandler {
 
   async getAnaliticsHandlerById(request, h) {
     const { customerId } = request.params;
-    const { userID } = request.yar.get("user_loged");
+    const cookie = request.yar.get("user_loged");
     try {
       const analitics = await this._analiticService.getAnaliticsById(
-        customerId,
-        userID,
+        request,
+        cookie.passkeyId,
       );
       return h
         .response({

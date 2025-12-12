@@ -179,7 +179,7 @@ class AuthHandler {
     const { verified } = verification;
     const { authenticationInfo } = verification;
     request.yar.set("user_loged", {
-      userID: passkey[0].id,
+      passkeyId: passkey[0].id,
     });
     console.info("User authenticated successfully, session created.");
     // Update the counter in the database
@@ -194,7 +194,7 @@ class AuthHandler {
     const userLoged = request.yar.get("user_loged");
 
     if (userLoged) {
-      return h.response({ userID: userLoged.userID }).code(200);
+      return h.response({ passkeyId: userLoged.passkeyId }).code(200);
     }
 
     return h.response({ session: "No active session" }).code(401);

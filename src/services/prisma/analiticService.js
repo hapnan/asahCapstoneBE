@@ -19,10 +19,35 @@ class analiticService {
     return analitics;
   }
 
-  async getAnaliticsById(request, { id }) {
+  async getAnaliticsById(request, { passkeyId }) {
     const { prisma } = request.server.app;
+    const passkey = await prisma.passkey.findUnique({
+      where: { passkeyId },
+    });
     const analitics = await prisma.analitics.findUnique({
-      where: { id },
+      where: { id_user: passkey.id_user },
+    });
+    return analitics;
+  }
+
+  async getSingleAnaliticsById(request, { customerid, passkeyId }) {
+    const { prisma } = request.server.app;
+    const passkey = await prisma.passkey.findUnique({
+      where: { passkeyId },
+    });
+    const analitics = await prisma.analitics.findUnique({
+      where: { id_customer: customerid, id_user: passkey.id_user },
+    });
+    return analitics;
+  }
+
+  async getAnaliticsById(request, { customerid, passkeyId }) {
+    const { prisma } = request.server.app;
+    const passkey = await prisma.passkey.findUnique({
+      where: { passkeyId },
+    });
+    const analitics = await prisma.analitics.findUnique({
+      where: { customerid_id: customerid, id_user: passkey.id_user },
     });
     return analitics;
   }
