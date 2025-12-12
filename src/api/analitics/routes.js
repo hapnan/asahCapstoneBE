@@ -11,7 +11,7 @@ const routes = (handler) => [
   },
   {
     method: "GET",
-    path: "/analitics/{customerId}",
+    path: "/analitics/user",
     handler: handler.getAnaliticsHandlerById,
   },
   {
