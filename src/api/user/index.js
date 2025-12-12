@@ -1,7 +1,7 @@
 import UserHandler from "./handler.js";
 import routes from "./routes.js";
 
-export default {
+const User = {
   name: "user",
   version: "0.0.1",
   dependencies: ["prisma"],
@@ -11,3 +11,5 @@ export default {
     server.route(userRoutes);
   },
 };
+
+export default User;

@@ -21,7 +21,7 @@ import UserService from "./services/prisma/userService.js";
 import voice from "./api/voice/index.js";
 import TwilioService from "./services/twilio/twilioService.js";
 
-import UserHandler from "./api/user/index.js";
+import User from "./api/user/index.js";
 const init = async () => {
   const cacheService = new CacheService();
   const authService = new AuthService();
@@ -99,6 +99,7 @@ const init = async () => {
     options: {
       analiticService,
       userService,
+      customerService: customersService,
     },
   });
 
@@ -110,7 +111,7 @@ const init = async () => {
   });
 
   await server.register({
-    plugin: UserHandler,
+    plugin: User,
     options: {
       userService,
     },

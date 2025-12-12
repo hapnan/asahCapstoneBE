@@ -19,35 +19,25 @@ class analiticService {
     return analitics;
   }
 
-  async getAnaliticsById(request, { passkeyId }) {
-    const { prisma } = request.server.app;
-    const passkey = await prisma.passkey.findUnique({
-      where: { passkeyId },
-    });
-    const analitics = await prisma.analitics.findUnique({
-      where: { id_user: passkey.id_user },
-    });
-    return analitics;
-  }
-
   async getSingleAnaliticsById(request, { customerid, passkeyId }) {
     const { prisma } = request.server.app;
-    const passkey = await prisma.passkey.findUnique({
-      where: { passkeyId },
+    const passkey = await prisma.passkeys.findUnique({
+      where: { id: passkeyId },
     });
-    const analitics = await prisma.analitics.findUnique({
-      where: { id_customer: customerid, id_user: passkey.id_user },
+    const analitics = await prisma.analitics.findFirst({
+      where: { id_customer: customerid, id_user: passkey.userId },
     });
     return analitics;
   }
 
   async getAnaliticsById(request, { customerid, passkeyId }) {
     const { prisma } = request.server.app;
-    const passkey = await prisma.passkey.findUnique({
-      where: { passkeyId },
+    const passkey = await prisma.passkeys.findUnique({
+      where: { id: passkeyId },
     });
-    const analitics = await prisma.analitics.findUnique({
-      where: { customerid_id: customerid, id_user: passkey.id_user },
+
+    const analitics = await prisma.analitics.findMany({
+      where: { id_customer: customerid, id_user: passkey.userId },
     });
     return analitics;
   }
@@ -69,6 +59,14 @@ class analiticService {
         status,
       },
     });
+  }
+
+  async countAcceptedAnalitics(request) {
+    const { prisma } = request.server.app;
+    const count = await prisma.analitics.count({
+      where: { status: "success" },
+    });
+    return count;
   }
 }
 

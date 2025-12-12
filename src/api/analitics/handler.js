@@ -1,7 +1,8 @@
 class AnaliticsHandler {
-  constructor(analiticService, userService) {
+  constructor(analiticService, userService, customerService) {
     this._analiticService = analiticService;
     this._userService = userService;
+    this._customerService = customerService;
 
     this.addAnaliticsHandler = this.addAnaliticsHandler.bind(this);
     this.getAnaliticsHandler = this.getAnaliticsHandler.bind(this);
@@ -57,18 +58,26 @@ class AnaliticsHandler {
   }
 
   async getAnaliticsHandlerById(request, h) {
-    const { customerId } = request.params;
     const cookie = request.yar.get("user_loged");
+
     try {
-      const analitics = await this._analiticService.getAnaliticsById(
-        request,
-        cookie.passkeyId,
-      );
+      const analitics = await this._analiticService.getAnaliticsById(request, {
+        passkeyId: cookie.passkeyId,
+      });
+
+      console.log("Retrieved analitics for user ID:", analitics);
+      const countCustomer =
+        await this._customerService.countDataCustomer(request);
+
+      const countAnaliticsAccepted =
+        await this._analiticService.countAcceptedAnalitics(request);
       return h
         .response({
           status: "success",
           data: {
             analitics,
+            countCustomer: countCustomer,
+            countAnaliticsAccepted: countAnaliticsAccepted,
           },
         })
         .code(200);
@@ -85,7 +94,7 @@ class AnaliticsHandler {
 
   async getAnaliticsHandler(request, h) {
     try {
-      const analitics = await this._analiticService.getAnalitics();
+      const analitics = await this._analiticService.getAnalitics(request);
       return h
         .response({
           status: "success",

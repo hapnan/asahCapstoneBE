@@ -74,4 +74,9 @@ export default class CustomerService {
       data: data,
     });
   }
+
+  async countDataCustomer(request) {
+    const { prisma } = request.server.app;
+    return await prisma.customers.count();
+  }
 }

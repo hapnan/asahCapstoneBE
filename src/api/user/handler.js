@@ -8,7 +8,7 @@ class UserHandler {
   async getUserProfile(request, h) {
     try {
       const passkeyId = request.yar.get("user_loged");
-
+      console.log("Logged-in user passkeyId:", passkeyId);
       if (!passkeyId || !passkeyId.passkeyId) {
         return h
           .response({
@@ -24,6 +24,7 @@ class UserHandler {
       );
 
       const userProfile = await this._userService.getUserById(
+        request,
         rpasskeyId.userId,
       );
 
