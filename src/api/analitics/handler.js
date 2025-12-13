@@ -14,11 +14,11 @@ class AnaliticsHandler {
   async addAnaliticsHandler(request, h) {
     try {
       const { id_customer, status } = request.payload;
-      const userLoged = request.yar.get("user_loged");
+      const cookie = request.yar.get("user_loged");
 
       const user = await this._userService.getUserBypasskeyId(
         request,
-        userLoged.userID,
+        cookie.passkeyId,
       );
       if (!user) {
         const response = h.response({
