@@ -248,7 +248,10 @@ class AuthHandler {
   async sessionCheckHandler(request, h) {
     const userLoged = request.yar.get("user_loged");
 
-    if (userLoged) {
+    const user = await this._authService.getPasskeyById(request, {
+      id: userLoged.passkeyId,
+    });
+    if (userLoged && user) {
       return h.response({ passkeyId: userLoged.passkeyId }).code(200);
     }
 
