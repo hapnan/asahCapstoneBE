@@ -55,7 +55,7 @@ class AuthService {
     return userWithPasskeys ? userWithPasskeys.passkeys : [];
   }
 
-  async getPasskeyById(request, id) {
+  async getPasskeyById(request, { id }) {
     const { prisma } = request.server.app;
     const passkey = await prisma.passkeys.findUnique({
       where: { id: id },
