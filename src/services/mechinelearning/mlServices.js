@@ -17,8 +17,16 @@ class MLServices {
         data: inputData,
       }),
     });
+    const predictionJson = await prediction.json();
 
-    return prediction.json();
+    if (!prediction.ok) {
+      console.log(
+        "ML Services prediction error:",
+        JSON.stringify(predictionJson, null, 2),
+      );
+    }
+    console.log("ML Services prediction response:", predictionJson);
+    return predictionJson;
   }
 }
 
