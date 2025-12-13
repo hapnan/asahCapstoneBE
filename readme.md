@@ -12,6 +12,8 @@ PostgreSQL, Redis, and WebAuthn authentication.
 - **Authentication**: [SimpleWebAuthn](https://simplewebauthn.dev/) (Passkey
   authentication)
 - **Session**: @hapi/yar (Cookie-based sessions)
+- **VoIP**: [Twilio Voice](https://www.twilio.com/voice) (Voice calling integration)
+- **Machine Learning**: Custom ML API integration for predictions
 
 ## 📋 Prerequisites
 
@@ -21,7 +23,6 @@ Before you begin, ensure you have the following installed:
 - [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
 - [PostgreSQL](https://www.postgresql.org/) (v12 or higher)
 - [Redis](https://redis.io/) (v6 or higher)
-- [Prisma Accelerate](https://console.prisma.io/) account (for caching)
 
 ## 🛠️ Installation
 
@@ -43,8 +44,8 @@ npm install
 Create a `.env` file in the root directory:
 
 ```env
-# Direct PostgreSQL Connection (for migrations)
-DIRECT_DATABASE_URL="postgresql://user:password@localhost:5432/asah_db"
+# Direct database connection
+DIRECT_DATABASE_URL="postgresql://user:password@host:5432/database"
 
 # Redis Configuration
 REDIS_URL="redis://localhost:6379"
@@ -53,6 +54,25 @@ REDIS_URL="redis://localhost:6379"
 PORT=3000
 HOST=localhost
 NODE_ENV=development
+
+# Machine Learning API
+ML_API="http://your-ml-api-endpoint.com/predict"
+
+# Twilio Configuration
+# Your Twilio Account SID (found in Twilio Console)
+TWILIO_ACCOUNT_SID="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Twilio API Key (create in Twilio Console > Account > API Keys)
+TWILIO_API_KEY="SKxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Twilio API Secret (shown once when creating API Key)
+TWILIO_API_SECRET="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# TwiML Application SID (create in Twilio Console > Voice > TwiML Apps)
+TWILIO_TWIML_APP_SID="APxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Your Twilio Phone Number (E.164 format, e.g., +1234567890)
+TWILIO_CALLER_NUMBER="+1234567890"
 ```
 
 ### 4. Set Up Database
@@ -90,6 +110,12 @@ sudo systemctl start redis
 npm run start:dev
 ```
 
+or
+
+```bash
+npm start
+```
+
 The server will start at `http://localhost:3000`
 
 ## 📜 Available Scripts
@@ -118,10 +144,43 @@ The server will start at `http://localhost:3000`
 
 ### Customers
 
-| Method | Endpoint         | Description                          |
-| ------ | ---------------- | ------------------------------------ |
-| `GET`  | `/customers`     | Get all customers list               |
-| `GET`  | `/customers/:id` | Get one customer based on customerId |
+| Method | Endpoint             | Description                               |
+| ------ | -------------------- | ----------------------------------------- |
+| `GET`  | `/customers`         | Get all customers list                    |
+| `GET`  | `/customers/:id`     | Get one customer based on customerId      |
+| `GET`  | `/customers/predict` | Get all customers ready for ML prediction |
+
+### Analytics
+
+| Method   | Endpoint                  | Description                            |
+| -------- | ------------------------- | -------------------------------------- |
+| `POST`   | `/analitics`              | Create new analytics record            |
+| `GET`    | `/analitics`              | Get all analytics records              |
+| `GET`    | `/analitics/user`         | Get analytics records for current user |
+| `PUT`    | `/analitics/{customerId}` | Update analytics record for a customer |
+| `DELETE` | `/analitics/{customerId}` | Delete analytics record for a customer |
+
+### Predictions
+
+| Method | Endpoint       | Description                       |
+| ------ | -------------- | --------------------------------- |
+| `POST` | `/predict`     | Create ML prediction for customer |
+| `GET`  | `/predict`     | Get all predictions               |
+| `GET`  | `/predict/:id` | Get prediction by customer ID     |
+
+### User Profile
+
+| Method | Endpoint | Description              |
+| ------ | -------- | ------------------------ |
+| `GET`  | `/user`  | Get current user profile |
+
+### Voice (Twilio VoIP)
+
+| Method | Endpoint          | Description                               |
+| ------ | ----------------- | ----------------------------------------- |
+| `GET`  | `/voice/token`    | Get Twilio access token for VoIP calls    |
+| `POST` | `/voice/response` | Twilio webhook for voice response (TwiML) |
+| `POST` | `/voice/status`   | Twilio webhook for call status updates    |
 
 ## 🗄️ Database Schema
 
@@ -155,24 +214,50 @@ The project uses Prisma ORM with the following models:
 - `id`: Int (Primary Key)
 - `name`: String
 - `age`: Int
+- `campaign`: Int
 - `job`: String
 - `education`: String
 - `marital`: Enum (divorced, married, single, unknown)
-- `contact_comunication`: String
-- `housing_loan`: Enum (yes, no,unknown)
-- `personal_loan`: Enum (yes, no,unknown)
-- `has_credit`: Enum (yes, no,unknown)
+- `contact`: String
+- `day_of_week`: String
+- `month`: String
+- `default`: Enum (yes, no, unknown)
+- `housing`: Enum (yes, no, unknown)
+- `loan`: Enum (yes, no, unknown)
+- `pdays`: Int
+- `previous`: Int
+- `poutcome`: String
+- `emp_var_rate`: Float
+- `cons_price_idx`: Float
+- `cons_conf_idx`: Float
+- `euribor3m`: Float
+- `nr_employed`: Int
+- `has_credit`: Enum (yes, no, unknown)
 - `last_day_contacted`: Enum (monday, tuesday, wednesday, thursday, friday,
   saturday, sunday)
 - `last_month_contacted`: Enum (january, february, march, april, may, june,
-  july, august, september,october, november, december)
+  july, august, september, october, november, december)
 - `how_many_contacted_now`: Int
-- `how_many_contacted_previous` Int
+- `how_many_contacted_previous`: Int
 - `days_last_contacted`: Int
 - `result_of_last_campaign`: Enum (failure, nonexistent, success)
-- `predictive_subscribe`: Enum (failure, nonexistent, success) => Filled based
-  on ML Result
-- `predictive_score_subscribe`: Float => Filled based on ML Result
+- Relations: Has many `analitics`, Has many `predict`
+
+### Predict
+
+- `id`: Int (Primary Key)
+- `id_customer`: Int (Foreign Key)
+- `predictive_subscribe`: String
+- `predictive_score_subscribe`: Float
+- Relations: Belongs to `customers`
+
+### Analytics
+
+- `id`: Int (Primary Key)
+- `id_user`: String (Foreign Key)
+- `id_customer`: Int (Foreign Key)
+- `status`: Enum (failure, nonexistent, success)
+- Relations: Belongs to `User`, Belongs to `customers`
 
 ## 🔧 Configuration
 
@@ -252,8 +337,16 @@ asahCapstoneBE/
 │   │   │   ├── handler.js             # Customer route handlers
 │   │   │   ├── index.js               # Plugin registration
 │   │   │   └── routes.js              # Route definitions
-│   │   └── predict/                   # ML predictions
-│   │       ├── handler.js             # Prediction route handlers
+│   │   ├── predict/                   # ML predictions
+│   │   │   ├── handler.js             # Prediction route handlers
+│   │   │   ├── index.js               # Plugin registration
+│   │   │   └── routes.js              # Route definitions
+│   │   ├── user/                      # User profile management
+│   │   │   ├── handler.js             # User route handlers
+│   │   │   ├── index.js               # Plugin registration
+│   │   │   └── routes.js              # Route definitions
+│   │   └── voice/                     # Twilio VoIP integration
+│   │       ├── handler.js             # Voice route handlers
 │   │       ├── index.js               # Plugin registration
 │   │       └── routes.js              # Route definitions
 │   ├── exeptions/                     # Custom error classes
@@ -272,9 +365,12 @@ asahCapstoneBE/
 │   │   │   ├── analiticService.js     # Analytics CRUD operations
 │   │   │   ├── authService.js         # Auth database operations
 │   │   │   ├── customerService.js     # Customer CRUD operations
-│   │   │   └── predictService.js      # Prediction CRUD operations
-│   │   └── redis/                     # Caching services
-│   │       └── CacheService.js        # Redis cache operations
+│   │   │   ├── predictService.js      # Prediction CRUD operations
+│   │   │   └── userService.js         # User profile operations
+│   │   ├── redis/                     # Caching services
+│   │   │   └── CacheService.js        # Redis cache operations
+│   │   └── twilio/                    # Twilio VoIP services
+│   │       └── twilioService.js       # Twilio Voice integration
 │   ├── validator/                     # Request validation schemas
 │   │   └── auth/
 │   │       ├── index.js
@@ -289,15 +385,6 @@ asahCapstoneBE/
 ├── tsconfig.prisma.json               # TypeScript config for Prisma
 └── README.md                          # This file
 ```
-
-## 🔐 Security Features
-
-- ✅ **Passkey Authentication** - Passwordless login using WebAuthn
-- ✅ **CORS Protection** - Configured allowed origins
-- ✅ **HttpOnly Cookies** - XSS protection
-- ✅ **SameSite Cookies** - CSRF protection
-- ✅ **Secure Cookies** - HTTPS in production
-- ✅ **Error Handling** - Custom error classes and handlers
 
 ## 🚢 Deployment
 
@@ -324,10 +411,11 @@ HOST=0.0.0.0
 ## 📚 Additional Resources
 
 - [Prisma v7 Documentation](https://www.prisma.io/docs)
-- [Prisma Accelerate Setup](./ACCELERATE_SETUP.md)
 - [Hapi.js Documentation](https://hapi.dev/api/)
 - [SimpleWebAuthn Docs](https://simplewebauthn.dev/)
 - [WebAuthn Guide](https://webauthn.guide/)
+- [Twilio Voice Setup Guide](./TWILIO_SETUP.md)
+- [Twilio Voice Documentation](https://www.twilio.com/docs/voice)
 
 ## 🤝 Contributing
 
