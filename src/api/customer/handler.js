@@ -1,3 +1,9 @@
+import zlib from "zlib";
+import { promisify } from "util";
+
+const gzip = promisify(zlib.gzip);
+const gunzip = promisify(zlib.gunzip);
+
 export default class CustomersHandler {
   constructor(cacheService, customersService) {
     this._cacheService = cacheService;
@@ -28,13 +34,21 @@ export default class CustomersHandler {
       const cacheKey = "customer_all_full";
       try {
         const cached = await this._cacheService.get(cacheKey);
-        return h.response(JSON.parse(cached)).code(200);
+        // Decompress the cached data
+        const decompressed = await gunzip(Buffer.from(cached, "base64"));
+        const data = JSON.parse(decompressed.toString());
+        return h.response(data).code(200);
       } catch (_) {}
 
       const customers =
         await this._customersService.getAllCustomerForPredict(request);
 
-      await this._cacheService.set(cacheKey, JSON.stringify(customers), 300);
+      // Compress data before caching
+      const jsonString = JSON.stringify(customers);
+      const compressed = await gzip(jsonString);
+      const base64Compressed = compressed.toString("base64");
+
+      await this._cacheService.set(cacheKey, base64Compressed, 300);
 
       return h.response(customers).code(200);
     } catch (error) {
