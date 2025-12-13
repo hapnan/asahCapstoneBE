@@ -9,6 +9,7 @@ class VoiceHandler {
 
   /**
    * GET /voice/token - Generate Twilio access token for VoIP
+   * Query params: refresh=true (optional) - for token refresh
    */
   async getAccessToken(request, h) {
     try {
@@ -26,17 +27,17 @@ class VoiceHandler {
       // Use the logged-in user's ID as identity
       const identity = userLogged.passkeyId;
 
-      const token = this._twilioService.generateAccessToken(identity);
+      // Generate token with expiration info
+      const tokenData = this._twilioService.generateAccessToken(identity);
 
-      console.log(`Generated access token for user: ${identity}`);
+      console.log(
+        `Generated access token for user: ${identity}, expires at: ${new Date(tokenData.expiresAt).toISOString()}`,
+      );
 
       return h
         .response({
           status: "success",
-          data: {
-            token,
-            identity,
-          },
+          data: tokenData,
         })
         .code(200);
     } catch (error) {

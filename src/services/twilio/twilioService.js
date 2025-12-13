@@ -37,9 +37,10 @@ class TwilioService {
   /**
    * Generate Twilio Access Token for VoIP calls
    * @param {string} identity - Unique identifier for the user (e.g., username or user ID)
-   * @returns {string} JWT access token
+   * @param {number} ttl - Time to live in seconds (default: 3600 = 1 hour)
+   * @returns {object} Object containing JWT token and expiration time
    */
-  generateAccessToken(identity) {
+  generateAccessToken(identity, ttl = 3600) {
     if (!identity) {
       throw new Error("Identity is required to generate access token");
     }
@@ -51,7 +52,7 @@ class TwilioService {
       this.apiSecret,
       {
         identity: identity,
-        ttl: 3600, // Token valid for 1 hour
+        ttl: ttl, // Token valid for specified duration
       },
     );
 
@@ -64,7 +65,17 @@ class TwilioService {
     // Add the grant to the token
     token.addGrant(voiceGrant);
 
-    return token.toJwt();
+    const jwt = token.toJwt();
+
+    // Calculate expiration timestamp
+    const expiresAt = Date.now() + ttl * 1000;
+
+    return {
+      token: jwt,
+      identity: identity,
+      expiresAt: expiresAt,
+      expiresIn: ttl,
+    };
   }
 
   /**
