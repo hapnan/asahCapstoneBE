@@ -1,3 +1,6 @@
+import ClientError from "../../exeptions/ClientError.js";
+import NotFoundError from "../../exeptions/NotFoundError.js";
+
 class UserHandler {
   constructor(userService) {
     this._userService = userService;
@@ -10,12 +13,7 @@ class UserHandler {
       const passkeyId = request.yar.get("user_loged");
       console.log("Logged-in user passkeyId:", passkeyId);
       if (!passkeyId || !passkeyId.passkeyId) {
-        return h
-          .response({
-            status: "fail",
-            message: "Unauthorized. Please login first.",
-          })
-          .code(401);
+        throw new ClientError("Unauthorized. Please login first.", 401);
       }
 
       const rpasskeyId = await this._userService.getUserBypasskeyId(
@@ -29,12 +27,7 @@ class UserHandler {
       );
 
       if (!userProfile) {
-        return h
-          .response({
-            status: "fail",
-            message: "User not found",
-          })
-          .code(404);
+        throw new NotFoundError("User not found");
       }
       return h
         .response({
@@ -45,6 +38,14 @@ class UserHandler {
         })
         .code(200);
     } catch (error) {
+      if (error instanceof ClientError) {
+        return h
+          .response({
+            status: "fail",
+            message: error.message,
+          })
+          .code(error.statusCode);
+      }
       console.error("Error fetching user profile:", error);
       return h
         .response({

@@ -1,3 +1,6 @@
+import ClientError from "../../exeptions/ClientError.js";
+import NotFoundError from "../../exeptions/NotFoundError.js";
+
 class AnaliticsHandler {
   constructor(analiticService, userService, customerService) {
     this._analiticService = analiticService;
@@ -21,12 +24,7 @@ class AnaliticsHandler {
         cookie.passkeyId,
       );
       if (!user) {
-        const response = h.response({
-          status: "fail",
-          message: "User not found",
-        });
-        response.code(404);
-        return response;
+        throw new NotFoundError("User not found");
       }
 
       console.log("Adding analitics for user ID:", user.userId);
@@ -47,6 +45,14 @@ class AnaliticsHandler {
       response.code(201);
       return response;
     } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: "fail",
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
       console.error("Error adding analitics:", error);
       const response = h.response({
         status: "fail",
@@ -82,6 +88,14 @@ class AnaliticsHandler {
         })
         .code(200);
     } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: "fail",
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
       console.error("Error retrieving analitics by ID:", error);
       const response = h.response({
         status: "fail",
@@ -104,6 +118,14 @@ class AnaliticsHandler {
         })
         .code(200);
     } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: "fail",
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
       console.error("Error retrieving analitics:", error);
       const response = h.response({
         status: "fail",
@@ -125,6 +147,14 @@ class AnaliticsHandler {
         })
         .code(200);
     } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: "fail",
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
       console.error("Error deleting analitics:", error);
       const response = h.response({
         status: "fail",
@@ -151,6 +181,14 @@ class AnaliticsHandler {
         })
         .code(200);
     } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: "fail",
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
       console.error("Error updating analitics:", error);
       const response = h.response({
         status: "fail",

@@ -1,5 +1,7 @@
 import zlib from "zlib";
 import { promisify } from "util";
+import ClientError from "../../exeptions/ClientError.js";
+import NotFoundError from "../../exeptions/NotFoundError.js";
 
 const gzip = promisify(zlib.gzip);
 const gunzip = promisify(zlib.gunzip);
@@ -73,18 +75,21 @@ export default class CustomersHandler {
       );
 
       if (!customer) {
-        return h
-          .response({
-            status: "fail",
-            message: "Customer not found",
-          })
-          .code(404);
+        throw new NotFoundError("Customer not found");
       }
 
       await this._cacheService.set(cacheKey, JSON.stringify(customer), 300);
 
       return h.response(customer).code(200);
     } catch (error) {
+      if (error instanceof ClientError) {
+        return h
+          .response({
+            status: "fail",
+            message: error.message,
+          })
+          .code(error.statusCode);
+      }
       console.error("getCustomerById: ", error);
       return h.response({ error: "Internal server error" }).code(500);
     }

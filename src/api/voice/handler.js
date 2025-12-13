@@ -1,3 +1,6 @@
+import ClientError from "../../exeptions/ClientError.js";
+import InvariantError from "../../exeptions/InvariantError.js";
+
 class VoiceHandler {
   constructor(twilioService) {
     this._twilioService = twilioService;
@@ -16,12 +19,7 @@ class VoiceHandler {
       const userLogged = request.yar.get("user_loged");
 
       if (!userLogged || !userLogged.passkeyId) {
-        return h
-          .response({
-            status: "fail",
-            message: "Unauthorized. Please login first.",
-          })
-          .code(401);
+        throw new ClientError("Unauthorized. Please login first.", 401);
       }
 
       // Use the logged-in user's ID as identity
@@ -41,6 +39,14 @@ class VoiceHandler {
         })
         .code(200);
     } catch (error) {
+      if (error instanceof ClientError) {
+        return h
+          .response({
+            status: "fail",
+            message: error.message,
+          })
+          .code(error.statusCode);
+      }
       console.error("Error generating access token:", error);
 
       return h

@@ -1,3 +1,6 @@
+import ClientError from "../../exeptions/ClientError.js";
+import InvariantError from "../../exeptions/InvariantError.js";
+
 class PredictionHandler {
   constructor(mlServices, predictService, cacheService) {
     this._mlServices = mlServices;
@@ -17,7 +20,7 @@ class PredictionHandler {
         !prediction.predictions ||
         !Array.isArray(prediction.predictions)
       ) {
-        throw new Error("Invalid prediction response format");
+        throw new InvariantError("Invalid prediction response format");
       }
 
       // Handle predictions - the ML API now returns id in the prediction result
@@ -39,6 +42,14 @@ class PredictionHandler {
         })
         .code(200);
     } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: "fail",
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
       console.error("Error handling prediction request:", error);
       const response = h.response({
         status: "error",
